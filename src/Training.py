@@ -111,9 +111,15 @@ def get_score(distance_frequencies_by_pairs : dict, reference_distance_frequenci
 	for pair, distances in distance_frequencies_by_pairs.items():
 		distance_scores_by_pairs[pair] = dict()
 		for d in distances.keys():
-			distance_scores_by_pairs[pair][d] = -(log(distance_frequencies_by_pairs[pair][d] / reference_distance_frequencies[d] ))
+			distance_scores_by_pairs[pair][d] = min(-(log(distance_frequencies_by_pairs[pair][d] / reference_distance_frequencies[d] )),10)
 
 	return distance_scores_by_pairs
+
+def save_to_csv(path : str, data : dict):
+	with open(path,"w") as file:
+		for key, value in data.items():
+			file.write(f"{key},{value}\n")
+	return
 
 def plot_distrib(distances_distribution, pair = "XX"):
 	plot = plt.figure()
@@ -130,13 +136,37 @@ def plot_distrib_by_pairs(distances_distribution_by_pairs) :
 	for key, value in distances_distribution_by_pairs.items() :
 		plot_distrib(value,key)
 
-if __name__ == "__main__" :
+def main():
 
-	path_data_dir = str(os.path.join(os.getcwd(), sys.argv[1],"*"))
+	plot_option = False
+	path_data_dir = str(os.path.join(__file__, "data"))
+	usage = "Usage :\npython [Path_to_Training.py] [-h, --help] [--plot] [Path_to_data_directory]\n\t[Path_to_Training.py] : Path to this training script \n\t[-h, --help] : Prints this help text \n\t[--plot] : Use if plots of the intermediary and scores distributions wanted \n\t[Path_to_data_directory] : Path to the data directory\n\t\tMust contain a directory containing pdb files"
 
+	if (len(sys.argv) > 1):
+		for i in range(len(sys.argv)):
+			if (sys.argv[i] in ["-h","--help"]) :
+				print(usage)
+				return
+			elif (sys.argv[i] == "--plot") :
+				plot_option = True
+			elif (os.path.exists(sys.argv[i])):
+				if (os.path.isabs(sys.argv[i])) :
+					path_data_dir = str(sys.argv[i])
+				else:
+					path_data_dir = str(os.path.join(os.getcwd(), sys.argv[i]))
+			else:
+				print(usage)
+				return
+
+	
 	print(path_data_dir)
 
-	pdb_file_names = glob.glob(path_data_dir)
+	if( not (os.path.exists(path_data_dir and os.path.isdir(path_data_dir)))):
+		print("Data directory not found.")
+		print(usage)
+		return
+
+	pdb_file_names = glob.glob(os.path.join(path_data_dir,"*/*.pdb"))
 
 	d = dict()
 	for file in pdb_file_names :
@@ -160,3 +190,7 @@ if __name__ == "__main__" :
 	plot_distrib(reference_distance_frequencies)
 
 	plot_distrib_by_pairs(distance_scores_by_pairs)
+
+
+if __name__ == "__main__" :
+	main()
