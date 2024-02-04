@@ -25,24 +25,34 @@ pip install -r requirements.txt
 ### Usage of Training.py
 
 python [Path_to_Training.py] [-h, --help] [--plot] [Path_to_data_directory]
-        [Path_to_Training.py] : Path to this training script
-        [-h, --help] : Prints this help text
-        [--plot] : Use if plots of the intermediary and scores distributions wanted
-        [Path_to_data_directory] : Path to the data directory
-                Must contain a directory containing pdb files
+
+[Path_to_Training.py] : Path to this training script
+
+[-h, --help] : Prints this help text
+
+[--plot] : Use if plots of the intermediary and scores distributions wanted
+
+[Path_to_data_directory] : Path to the data directory.
+        Must contain a directory containing pdb files
 
 ### Usage Plotting.py
 
 python [Path_to_Plotting.py] [-h, --help] [Path_to_data_directory]
-        [Path_to_Plotting.py] : Path to this plotting script
-        [-h, --help] : Prints this help text
-        [Path_to_data_directory] : Path to the data directory
-                Must contain a directory containing the score csv files
+
+[Path_to_Plotting.py] : Path to this plotting script
+
+[-h, --help] : Prints this help text
+
+[Path_to_data_directory] : Path to the data directory.
+        Must contain a directory containing the score csv files
 
 ### Usage Scoring.py
 
 python [Path_to_Scoring.py] [-h, --help] [Path_to_data_directory]
-        [Path_to_Scoring.py] : Path to this scoring script
-        [-h, --help] : Prints this help text
-        [Path_to_data_directory] : Path to the data directory
-                Must contain a directory containing the score csv files and another containing only the input pdb file
+
+[Path_to_Scoring.py] : Path to this scoring script
+
+[-h, --help] : Prints this help text
+
+[Path_to_data_directory] : Path to the data directory.
+        Must contain a directory containing the score csv files and another containing only the input pdb file
