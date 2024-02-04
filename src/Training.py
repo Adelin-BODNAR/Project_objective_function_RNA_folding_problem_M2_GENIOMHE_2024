@@ -8,6 +8,27 @@ import sys
 from Plotting import plot_distrib, plot_distrib_by_pairs
 
 def get_interatomic_distances_distribution_by_pairs(filename, distances_distribution_by_pairs = dict(),round_down = True):
+
+	""" Function parsing a pdb file to get the distribution of interatomic distances between each possible pair of nucleosides
+
+	Parameters
+	----------
+	filename
+		String containing the path to the pdb file that must be parsed
+	distances_distribution_by_pairs
+		Dictionary in which the distribution of distances by pairs is stored
+		Pass the same dictionary for multiple files to get the distribution across all of them
+	round_down
+		Boolean used to know if the distances should be rounded down or not
+		True should be used for the training and False for the scoring
+
+	Returns
+	-------
+	distances_distribution_by_pairs
+		Dictionary containing the distribution of distances for each pair of nucleosides
+	
+	"""
+
 	lines = []
 
 	#Gets the lines from the "filename" file and strips them of the Carriage Return at the end of the line
@@ -96,6 +117,20 @@ def get_interatomic_distances_distribution_by_pairs(filename, distances_distribu
 	return distances_distribution_by_pairs
 
 def get_reference_distances_distribution(distances_distribution_by_pairs):
+
+	"""Function calculating the distances distribution across all pairs of nucleosides from a dictionary by pairs
+
+	Parameters
+	----------
+	distances_distribution_by_pairs
+		Dictionary containing the dictionaries of the distribution of distances for each pair of nucleosides
+
+	Returns
+	-------
+	reference_distances_distribution
+		 Dictionary containing the distances distribution across all pairs of nucleosides
+	"""
+
 	reference_distances_distribution = dict()
 	for distrib in distances_distribution_by_pairs.values():
 		for d in distrib.keys():
@@ -106,6 +141,20 @@ def get_reference_distances_distribution(distances_distribution_by_pairs):
 	return reference_distances_distribution
 
 def get_frequencies(distances_distribution : dict):
+
+	"""Function calculating the distances frequencies for each pair of nucleosides from a dictionary of distance distribution by pairs
+
+	Parameters
+	----------
+	distances_distribution_by_pairs
+		Dictionary containing the dictionaries of the distribution of distances for each pair of nucleosides
+
+	Returns
+	-------
+	reference_distances_distribution
+		 Dictionary containing the distances frequencies for each pair of nucleosides
+	"""
+
 	N = sum(distances_distribution)
 	distance_frequencies = dict()
 	for key, value in distances_distribution.items() :
@@ -113,6 +162,22 @@ def get_frequencies(distances_distribution : dict):
 	return distance_frequencies
 
 def get_scores(distance_frequencies_by_pairs : dict, reference_distance_frequencies : dict) :
+
+	"""Function calculating the distance scores for each pair of nucleosides using a dictionary of distance frequencies by pairs and the reference one
+
+	Parameters
+	----------
+	distance_frequencies_by_pairs
+		Dictionary containing the dictionaries of the distribution of distances for each pair of nucleosides
+	reference_distance_frequencies
+		Dictionary containing the dictionaries of the frequencies of distances across all pairs of nucleosides
+
+	Returns
+	-------
+	distance_scores_by_pairs
+		 Dictionary containing the distance scores for each pair of nucleosides
+	"""
+
 	distance_scores_by_pairs = dict()
 	for pair, distances in distance_frequencies_by_pairs.items():
 		distance_scores_by_pairs[pair] = dict()
@@ -124,6 +189,20 @@ def get_scores(distance_frequencies_by_pairs : dict, reference_distance_frequenc
 
 def save_distribs(path_distrib_dir : str,distribs_by_pairs : dict):
 
+	"""Function saving the data produced in this script usin the save_to_csv function from Utility_script.py
+
+	Parameters
+	----------
+	path_distrib_dir
+		String containing the path to the directory where the files for each pairs of nucleotides that contain the data of the dictionary passed as a parameter must be saved
+	distribs_by_pairs
+		Dictionary containing the distributions, frequencies or scores that must be saved
+
+	Returns
+	-------
+	None
+	"""
+
 	if ( not (os.path.isdir(path_distrib_dir))) :
 		os.mkdir(path_distrib_dir)
 	for key, value in distribs_by_pairs.items() :
@@ -133,6 +212,17 @@ def save_distribs(path_distrib_dir : str,distribs_by_pairs : dict):
 
 
 def main():
+
+	""" Function called when this script is executed as a script and not imported as a library
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
 
 	plot_option = False
 	path_data_dir = str(os.path.join(__file__, "data"))
@@ -195,6 +285,6 @@ def main():
 
 	return
 
-
+#Call the main function when this script is executed as a script and not imported as a library
 if __name__ == "__main__" :
 	main()

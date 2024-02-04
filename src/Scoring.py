@@ -4,11 +4,46 @@ from Training import get_interatomic_distances_distribution_by_pairs
 from math import ceil, floor
 
 def linear_interpolation(x,x0,y0,x1,y1):
+    
+    """ Function performing a linear interpolation
+
+    Parameters
+    ----------
+    x
+        The x value for which the y value must be calculated by linear interpolation
+    x0 , y0
+        Coordinates of the lower point used in the linear interpolation
+    x1 , y1
+        Coordinates of the higher point used in the linear interpolation
+
+    Returns
+    -------
+    y
+        Result of the linear interpolation formula performed with the data passed in arguments
+    """
+
     return ( (y0 * (x1 - x)) + (y1 * (x - x0)) ) / (x1 - x0)
 
-def get_estimated_energy(input_scores_distrib,distance_scores_by_pairs):
+def get_estimated_energy(input_distances_distrib,distance_scores_by_pairs):
+
+    """ Function calculating the estimated Gibbs free energy using the data passed as arguments
+
+    Parameters
+    ----------
+    input_distances_distrib
+        Dictionary containing the distribution of distances between 1 and 20 included and not rounded down
+    distance_scores_by_pairs
+        Dictionary of the distribution of scores for distances between 1 and 20 included and rounded down for each pair of nucleosides
+        This dictionary is used as reference scores for the linear interpolation of the scores for the input distances
+
+    Returns
+    -------
+    sum(scores)
+        The estimated Gibbs free energy which is the sum of the scores calculated by linear interpolation for the input distances
+    """
+
     scores = []
-    for pair, distrib in input_scores_distrib.items():
+    for pair, distrib in input_distances_distrib.items():
         for distance, nb in distrib.items() :
             x0 = floor(distance)
             while (not(x0 in distance_scores_by_pairs[pair].keys()) and x0 > 0):
@@ -21,6 +56,17 @@ def get_estimated_energy(input_scores_distrib,distance_scores_by_pairs):
     return sum( scores )
 
 def main():
+
+    """ Function called when this script is executed as a script and not imported as a library
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
 
     path_data_dir = str(os.path.join(__file__, "data"))
     usage = "Usage :\npython [Path_to_Scoring.py] [-h, --help] [Path_to_data_directory]\n\t[Path_to_Scoring.py] : Path to this scoring script \n\t[-h, --help] : Prints this help text \n\t[Path_to_data_directory] : Path to the data directory\n\t\tMust contain a directory containing the score csv files and another containing only the input pdb file"
@@ -60,14 +106,14 @@ def main():
 
     input_path = glob.glob(os.path.join(path_data_dir,"input/*.pdb"))[0]
 
-    input_scores_distrib = get_interatomic_distances_distribution_by_pairs(input_path,round_down= False)
+    input_distances_distrib = get_interatomic_distances_distribution_by_pairs(input_path,round_down= False)
 
-    estimated_gibbs_free_energy = get_estimated_energy(input_scores_distrib,distance_scores_by_pairs)
+    estimated_gibbs_free_energy = get_estimated_energy(input_distances_distrib,distance_scores_by_pairs)
 	
     print(f"Estimated Gibbs free energy for {os.path.splitext(os.path.basename(input_path))[0]} : {estimated_gibbs_free_energy}")
 
     return
 
-
+#Call the main function when this script is executed as a script and not imported as a library
 if __name__ == "__main__" :
 	main()

@@ -3,7 +3,28 @@ from math import ceil
 from Utility_script import import_from_csv
 import os, sys, glob
 
-def plot_distrib(fig,distances_distribution, pair = "XX",nb_ax = 0):
+def plot_distrib(fig,distances_distribution, pair = "",nb_ax = 0):
+
+    """ Function creating the subplot for the dictionary passed in parameters
+
+    Parameters
+    ----------
+    fig
+        Figure where the subplot will be displayed
+    distances_distribution
+        Dictionary containing the distribution, frequencies or scores for the distances used as keys
+        The dictionary is the kind produced for each pair of nucleosides in the Training.py script
+        This function is specifically design for a dictionnary with keys ranging from 1 to 20 included
+    pair : str
+        String containing the title of the subplot
+    nb_ax
+        Index of the subplot in the figure
+
+    Returns
+    -------
+    None
+    
+    """
 	
     ax =fig.axes[nb_ax]
     ax.bar(distances_distribution.keys(),distances_distribution.values())
@@ -12,7 +33,24 @@ def plot_distrib(fig,distances_distribution, pair = "XX",nb_ax = 0):
     
     return
 
-def plot_distrib_by_pairs(distances_distribution_by_pairs, plot_name = "Distribution") :
+def plot_distrib_by_pairs(distances_distribution_by_pairs, plot_name = "") :
+
+    """ Function creating the plot for the dictionary passed in parameters containing dictionaries for pairs of nucleosides
+
+    Parameters
+    ----------
+    distances_distribution_by_pairs
+        Dictionary containing for each pair of nucleosides the dictionary of the distribution, frequencies or scores for the distances used as keys
+        The dictionary is the kind produced in the Training.py script
+        This function is specifically design for a dictionary containing dictionaries with keys ranging from 1 to 20 included
+    plot_name : str, optional
+        String containing the title for the plot
+
+    Returns
+    -------
+    None
+    
+    """
 	
     #print(distances_distribution_by_pairs,"\n")
 
@@ -31,7 +69,29 @@ def plot_distrib_by_pairs(distances_distribution_by_pairs, plot_name = "Distribu
 
     return
 
-def plot_score_function(fig,scores, pair = "XX",nb_ax = 0):
+def plot_score_function(fig,scores, pair = "",nb_ax = 0):
+
+    """ Function creating the subplot for the dictionary passed in parameters as a function
+
+    Parameters
+    ----------
+    fig
+        Figure where the subplot will be displayed
+    scores
+        Dictionary containing the scores for the distances used as keys
+        The dictionary is the kind imported for each pair of nucleosides for the data saved that was produced in the Training.py script
+        This function is specifically design for a dictionnary with keys ranging from 1 to 20 included
+    pair : str
+        String containing the title for the subplot
+    nb_ax
+        Index of the subplot in the figure
+    
+
+    Returns
+    -------
+    None
+    
+    """
 	
     ax =fig.axes[nb_ax]
     ax.plot([ int(d) for d in scores.keys()], [float(v) for v in scores.values()])
@@ -40,6 +100,21 @@ def plot_score_function(fig,scores, pair = "XX",nb_ax = 0):
     return
 
 def plot_score_functions_by_pairs(scores_by_pairs):
+
+    """ Function creating the plot for the dictionary passed in parameters as a function
+
+    Parameters
+    ----------
+    scores_by_pairs
+        Dictionary containing for each pair of nucleosides the dictionary of the scores for the distances used as keys
+        The dictionary is the kind imported from the csv files used to save the data produced in the Training.py script
+        This function is specifically design for a dictionary containing dictionaries with keys ranging from 1 to 20 included
+
+    Returns
+    -------
+    None
+    
+    """
 	
     #print(scores_by_pairs,"\n")
 
@@ -59,6 +134,17 @@ def plot_score_functions_by_pairs(scores_by_pairs):
     return
 
 def main():
+    
+    """ Function called when this script is executed as a script and not imported as a library
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
 
     path_data_dir = str(os.path.join(__file__, "data"))
     usage = "Usage :\npython [Path_to_Plotting.py] [-h, --help] [Path_to_data_directory]\n\t[Path_to_Plotting.py] : Path to this plotting script \n\t[-h, --help] : Prints this help text \n\t[Path_to_data_directory] : Path to the data directory\n\t\tMust contain a directory containing the score csv files"
@@ -101,6 +187,6 @@ def main():
 
     return
 
-
+#Call the main function when this script is executed as a script and not imported as a library
 if __name__ == "__main__" :
 	main()
