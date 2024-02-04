@@ -1,10 +1,13 @@
+from importlib.resources import path
 from math import sqrt, log
-import matplotlib.pyplot as plt
+from Utility_script import save_to_csv
 import glob
 import os
 import sys
 
-def get_interatomic_distances(filename, distances_distribution_by_pairs = dict()):
+from Plotting import plot_distrib, plot_distrib_by_pairs
+
+def get_interatomic_distances_distribution_by_pairs(filename, distances_distribution_by_pairs = dict(),round_down = True):
 	lines = []
 
 	#Gets the lines from the "filename" file and strips them of the Carriage Return at the end of the line
@@ -60,7 +63,7 @@ def get_interatomic_distances(filename, distances_distribution_by_pairs = dict()
 					distance = sqrt( ((x1-x2)**2) + ((y1-y2)**2) + ((z1-z2)**2) )
 					distances_by_chain[key].append( [r1,r2,pos1,pos2,distance] )
 				
-	
+
 	distances_by_pairs = dict()
 	for key, value in distances_by_chain.items() :
 		for l in value :
@@ -79,12 +82,15 @@ def get_interatomic_distances(filename, distances_distribution_by_pairs = dict()
 		if not (key in distances_distribution_by_pairs.keys() ):
 			distances_distribution_by_pairs[key] = dict()
 		for l in value :
-			d = int(l[-1])
+			if (round_down) :
+				d = int(l[-1])
+			else :
+				d = l[-1]
 			if (d >=0 and d <=20) :
 				if not (d in distances_distribution_by_pairs[key].keys()) :
 					distances_distribution_by_pairs[key][d] = 0
 				distances_distribution_by_pairs[key][d] += 1
-			
+		
 	#print(distances_distribution_by_pairs,"\n")
 			
 	return distances_distribution_by_pairs
@@ -106,7 +112,7 @@ def get_frequencies(distances_distribution : dict):
 		distance_frequencies[key] = value / N
 	return distance_frequencies
 
-def get_score(distance_frequencies_by_pairs : dict, reference_distance_frequencies : dict) :
+def get_scores(distance_frequencies_by_pairs : dict, reference_distance_frequencies : dict) :
 	distance_scores_by_pairs = dict()
 	for pair, distances in distance_frequencies_by_pairs.items():
 		distance_scores_by_pairs[pair] = dict()
@@ -115,26 +121,16 @@ def get_score(distance_frequencies_by_pairs : dict, reference_distance_frequenci
 
 	return distance_scores_by_pairs
 
-def save_to_csv(path : str, data : dict):
-	with open(path,"w") as file:
-		for key, value in data.items():
-			file.write(f"{key},{value}\n")
+
+def save_distribs(path_distrib_dir : str,distribs_by_pairs : dict):
+
+	if ( not (os.path.isdir(path_distrib_dir))) :
+		os.mkdir(path_distrib_dir)
+	for key, value in distribs_by_pairs.items() :
+		#print(os.path.join(path_distrib_dir,f"{path_distrib_dir.split('/')[-1]}_{key}.csv"))
+		save_to_csv(os.path.join(path_distrib_dir,f"{path_distrib_dir.split('/')[-1]}_{key}.csv"),value)
 	return
 
-def plot_distrib(distances_distribution, pair = "XX"):
-	plot = plt.figure()
-	plt.bar(distances_distribution.keys(),distances_distribution.values())
-	plt.axis([0 , 20 + 1, min(distances_distribution.values()), max(distances_distribution.values()) * 1.1])
-	plt.title(pair)
-	plt.show()
-	return
-
-def plot_distrib_by_pairs(distances_distribution_by_pairs) :
-	
-	print(distances_distribution_by_pairs,"\n")
-	
-	for key, value in distances_distribution_by_pairs.items() :
-		plot_distrib(value,key)
 
 def main():
 
@@ -166,13 +162,11 @@ def main():
 		print(usage)
 		return
 
-	pdb_file_names = glob.glob(os.path.join(path_data_dir,"*/*.pdb"))
+	pdb_file_names = glob.glob(os.path.join(path_data_dir,"pdb*/*.pdb"))
 
 	d = dict()
 	for file in pdb_file_names :
-		d = get_interatomic_distances(file,d)
-
-	plot_distrib_by_pairs(d)
+		d = get_interatomic_distances_distribution_by_pairs(file,d)
 
 	reference_distances_distribution = get_reference_distances_distribution(d)
 
@@ -183,13 +177,23 @@ def main():
 	for pair, distrib in d.items():
 		distance_frequencies_by_pairs[pair] = get_frequencies(distrib)
 
-	distance_scores_by_pairs = get_score(distance_frequencies_by_pairs,reference_distance_frequencies)
+	distance_scores_by_pairs = get_scores(distance_frequencies_by_pairs,reference_distance_frequencies)
 
-	plot_distrib_by_pairs(distance_frequencies_by_pairs)
+	save_distribs(os.path.join(path_data_dir,"distribs"),d)
+	save_distribs(os.path.join(path_data_dir,"frequencies"),{**distance_frequencies_by_pairs,**{"XX" : reference_distance_frequencies}})
+	save_distribs(os.path.join(path_data_dir,"scores"),distance_scores_by_pairs)
 
-	plot_distrib(reference_distance_frequencies)
+	if (plot_option):
 
-	plot_distrib_by_pairs(distance_scores_by_pairs)
+		plot_distrib_by_pairs(d, plot_name = "Distribution of distances by pairs")
+
+		plot_distrib_by_pairs(distance_frequencies_by_pairs, plot_name = "Frequencies of distances by pairs")
+
+		plot_distrib_by_pairs({"XX" : reference_distance_frequencies}, plot_name = "Reference distance frequencies")
+
+		plot_distrib_by_pairs(distance_scores_by_pairs, plot_name = "Distribution of distance scores by pairs")
+
+	return
 
 
 if __name__ == "__main__" :
